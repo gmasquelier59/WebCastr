@@ -4,38 +4,74 @@ using System.ComponentModel;
 using WebCastr.Core.Requests;
 using WebCastr.Core.Models;
 using WebCastr.Core.Responses;
+using WebCastr.API.Services;
 
 namespace WebCastr.API.Controllers
 {
     [ApiController]
     [Tags("Stations")]
-    public class StationController : ControllerBase
+    public class StationController(IStationService stationService) : ControllerBase
     {
+        private readonly IStationService _stationService = stationService;
+
         /// <summary>
-        /// [NIY] Create a new radio station
+        /// Create a new radio station
         /// </summary>
         [HttpPost("/station")]
-        public async Task<ActionResult<StationResponse>> CreateAsync([FromBody] StationCreateRequest station)
+        public async Task<ActionResult<StationResponse>> CreateAsync([FromBody] StationCreateRequest request)
         {
-            throw new NotImplementedException();
+            Station? station;
+
+            try
+            {
+                station = await _stationService.CreateAsync(request);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500);
+            }
+
+            if (station == null)
+                return BadRequest();
+
+            return CreatedAtAction(nameof(GetByIdAsync), new { id = station.Id }, _stationService.MapToResponse(station));
         }
 
         /// <summary>
-        /// [NIY] Returns a list of stations
+        /// Returns a list of stations
         /// </summary>
         [HttpGet("/stations")]
         public async Task<ActionResult<List<StationResponse>>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            List<Station> stations = await _stationService.GetAllAsync();
+            List<StationResponse> stationsResponses = new List<StationResponse>();
+            
+            foreach(Station station in stations)
+                stationsResponses.Add(_stationService.MapToResponse(station));
+
+            return Ok(stationsResponses);
         }
 
         /// <summary>
-        /// [NIY] Returns informations about a station
+        /// Returns informations about a station by its id
         /// </summary>
         [HttpGet("/station/{id:guid}")]
         public async Task<ActionResult<StationResponse>> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            Station? station = await _stationService.GetById(id);
+
+            return station == null ? NotFound() : Ok(_stationService.MapToResponse(station));
+        }
+
+        /// <summary>
+        /// Returns informations about a station by its short name
+        /// </summary>
+        [HttpGet("/station/{shortName}")]
+        public async Task<ActionResult<StationResponse>> GetByShortNameAsync(string shortName)
+        {
+            Station? station = await _stationService.GetByShortName(shortName);
+
+            return station == null ? NotFound() : Ok(_stationService.MapToResponse(station));
         }
 
         /// <summary>
@@ -48,12 +84,14 @@ namespace WebCastr.API.Controllers
         }
 
         /// <summary>
-        /// [NIY] Permanently delete a station
+        /// Permanently delete a station
         /// </summary>
         [HttpDelete("/station/{id:guid}")]
         public async Task<ActionResult> DeleteByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            bool deleted = await _stationService.DeleteByIdAsync(id);
+
+            return deleted ? Ok() : NotFound();
         }
 
         /// <summary>

@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.1" />
@@ -42,10 +41,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WebCastr.Core\WebCastr.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DTO\" />
   </ItemGroup>
 
 </Project>

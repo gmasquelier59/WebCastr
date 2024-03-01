@@ -1,4 +1,4 @@
-using Serilog;
+   using Serilog;
 using WebCastr.API.Extensions;
 
 Version appVersion = new Version(0, 1, 0);
@@ -14,6 +14,7 @@ Log.Information($"Thank you for using WebCastr :-)");
 
 builder.AddDatabase();
 builder.AddControllers();
+builder.AddServices();
 builder.AddRepositories();
 builder.AddSwagger();
 

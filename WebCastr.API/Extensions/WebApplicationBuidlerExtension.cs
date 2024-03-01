@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 using WebCastr.Core.Requests;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using WebCastr.API.Data;
+using WebCastr.API.Services;
+using WebCastr.API.Repositories;
 
 namespace WebCastr.API.Extensions;
 
@@ -20,41 +23,49 @@ public static class WebApplicationBuidlerExtension
     public static void AddControllers(this WebApplicationBuilder builder)
     {
         Log.Information("Adding controllers...");
-        builder.Services.AddControllers()
-            .AddJsonOptions(options =>
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
-            );
+        builder.Services.AddControllers(options =>
+            options.SuppressAsyncSuffixInActionNames = false
+        ).AddJsonOptions(options =>
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())
+        );
+    }
+
+    public static void AddServices(this WebApplicationBuilder builder)
+    {
+        Log.Information("Adding services...");
+
+        builder.Services.AddScoped<IStationService, StationService>();
     }
 
     public static void AddRepositories(this WebApplicationBuilder builder)
     {
         Log.Information("Adding repositories...");
+
+        builder.Services.AddScoped<IStationRepository, StationRepository>();
     }
 
     public static void AddDatabase(this WebApplicationBuilder builder)
     {
-        Log.Information("Adding database...");
+        string? databaseProvider = builder.Configuration.GetRequiredSection("Database:Provider").Value;
+
+        Log.Information($"Adding database (provider: {databaseProvider})...");
         string[] supportedDatabaseProviders = new string[] { "sqlserver" };
 
-        string? databaseProvider = builder.Configuration.GetRequiredSection("Database:Provider").Value;
         if (string.IsNullOrEmpty(databaseProvider) || !supportedDatabaseProviders.Contains(databaseProvider))
-        {
             throw new NotSupportedException($"Unsupported database provider: {databaseProvider}");
-        }
-        Log.Information($"Database provider: {databaseProvider}");
 
-        //builder.Services.AddDbContext<AppDbContext>(options =>
-        //{
-        //    string connectionString = builder.Configuration.GetRequiredSection("Database:ConnectionString").Value ?? throw new InvalidOperationException("Connection string not found");
-        //    switch (databaseProvider)
-        //    {
-        //        case "sqlserver":
-        //            options.UseSqlServer(builder.Configuration.GetConnectionString(connectionString));
-        //            break;
-        //        default:
-        //            throw new NotSupportedException($"Unsupported database provider: {databaseProvider}");
-        //    }
-        //});
+        builder.Services.AddDbContext<AppDbContext>(options =>
+        {
+            string connectionString = builder.Configuration.GetRequiredSection("Database:ConnectionString").Value ?? throw new InvalidOperationException("Connection string not found");
+            switch (databaseProvider)
+            {
+                case "sqlserver":
+                    options.UseSqlServer(builder.Configuration.GetConnectionString(connectionString));
+                    break;
+                default:
+                    throw new NotSupportedException($"Unsupported database provider: {databaseProvider}");
+            }
+        });
     }
 
     public static void AddSwagger(this WebApplicationBuilder builder)
