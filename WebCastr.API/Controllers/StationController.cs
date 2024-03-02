@@ -75,6 +75,24 @@ namespace WebCastr.API.Controllers
         }
 
         /// <summary>
+        /// Returns the current track of a station by its short name
+        /// </summary>
+        [HttpGet("/station/{shortName}/now-playing")]
+        public async Task<ActionResult> GetNowPlayingByShortNameAsync(string shortName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Returns the current track of a station by its short name
+        /// </summary>
+        [HttpGet("/station/{id:guid}/now-playing")]
+        public async Task<ActionResult> GetNowPlayingByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
         /// [NIY] Update informations about a station
         /// </summary>
         [HttpPut("/station/{id:guid}")]
